@@ -74,7 +74,7 @@ module.exports = function(request, response) {
       if (err) {
         console.log(err);
       } else {
-        var messages = JSON.parse('{ "results": ['+data+']}');
+        var messages = JSON.parse('{ "results": [' + data + '] }');
         actions["GET"](response, statusCode, messages);
       }
     });
@@ -82,8 +82,7 @@ module.exports = function(request, response) {
 
   if (request.method === 'POST') {
     request.on('data', function(data) {
-      console.log('hi')
-      fs.appendFile(path.join(__dirname, 'messages.json'), data+',\n', function(err) {
+      fs.appendFile(path.join(__dirname, 'messages.json'), ',\n' + data, function(err) {
         if (err) console.log(err);
       });
     });
