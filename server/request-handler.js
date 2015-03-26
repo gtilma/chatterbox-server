@@ -11,10 +11,40 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var headers = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "access-control-allow-headers": "content-type, accept",
+  "access-control-max-age": 10, // Seconds.
+  "Content-Type": "application/json"
+};
+
+var sendResponse = function (response, statusCode, data) {
+  statusCode = statusCode || 200;
+  
+  response.writeHead(statusCode, headers);
+  response.end(JSON.stringify(data));
+
+}
+
+var actions = {
+  "GET": function (response, statusCode, data) {
+    sendResponse(response, statusCode, data);
+  },
+
+  "POST": function (response, statusCode, data) {
+    sendResponse(response, statusCode, data);
+  },
+
+  "OPTIONS": function () {}
+
+};
+
 
 module.exports = function(request, response) {
 
   var fs = require('fs');
+  var path = require('path');
   //var messageObj = require("./messages.json");
   // Request and Response come from node's http module.
   //
@@ -38,26 +68,48 @@ module.exports = function(request, response) {
   if (!isValid(request.url)) {
     statusCode = 404;
   }
+
   if (request.method === 'GET') {
-    fs.readFile('messages.json', {encoding: 'utf-8'},function(err, data){
-      if (err) {console.log('error');}
-      else { console.log(data); }
+    fs.readFile(path.join(__dirname, 'messages.json'), {encoding: 'utf-8', flag: 'r'}, function(err, data){
+      if (err) {
+        console.log(err);
+      } else {
+        var messages = JSON.parse('{ "results": ['+data+']}');
+        actions["GET"](response, statusCode, messages);
+      }
+    });
+  }
+
+  if (request.method === 'POST') {
+    request.on('data', function(data) {
+      console.log('hi')
+      fs.appendFile(path.join(__dirname, 'messages.json'), data+',\n', function(err) {
+        if (err) console.log(err);
+      });
+    });
+    request.on('end', function() {
+      actions['POST'](response, 201, null)
     })
   }
-  if (request.method === 'POST') {
-    
+
+  if (request.method === 'OPTIONS') {
+    request.on('end', function() {
+      // statusCode = 
+      response.writeHead(statusCode, headers);
+      response.end();
+    })
   }
 
   // var newData = ''
-  // response.on('data', function(data) {
+  // request.on('data', function(data) {
     // console.log(data)
     // newData += data
   // }
 
-  // response.on('end', ...)
+  // request.on('end', ...)
 
   // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
+  // var headers = defaultCorsHeaders;
 
   // Tell the client we are sending them plain text.
   //
@@ -67,9 +119,10 @@ module.exports = function(request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  // response.writeHead(statusCode, headers);
 
-  var responseText = JSON.stringify({results: 'boobs'});
+  // var responseText = 'boobs';
+
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
@@ -77,7 +130,8 @@ module.exports = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end(responseText);
+
+  // response.end(responseText);
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -89,13 +143,6 @@ module.exports = function(request, response) {
 //
 // Another way to get around this restriction is to serve your chat
 // client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "access-control-allow-headers": "content-type, accept",
-  "access-control-max-age": 10 // Seconds.
-};
-
 var urls = [
   '/',
   '/log',
