@@ -13,6 +13,9 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 
 module.exports = function(request, response) {
+
+  var fs = require('fs');
+  //var messageObj = require("./messages.json");
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -35,6 +38,23 @@ module.exports = function(request, response) {
   if (!isValid(request.url)) {
     statusCode = 404;
   }
+  if (request.method === 'GET') {
+    fs.readFile('messages.json', {encoding: 'utf-8'},function(err, data){
+      if (err) {console.log('error');}
+      else { console.log(data); }
+    })
+  }
+  if (request.method === 'POST') {
+    
+  }
+
+  // var newData = ''
+  // response.on('data', function(data) {
+    // console.log(data)
+    // newData += data
+  // }
+
+  // response.on('end', ...)
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -49,7 +69,7 @@ module.exports = function(request, response) {
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
 
-  var responseText = JSON.stringify({results: []});
+  var responseText = JSON.stringify({results: 'boobs'});
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
@@ -67,7 +87,7 @@ module.exports = function(request, response) {
 // Your chat client is running from a url like file://your/chat/client/index.html,
 // which is considered a different domain.
 //
-// Another way to get around this restriction is to serve you chat
+// Another way to get around this restriction is to serve your chat
 // client from this domain by setting up static file serving.
 var defaultCorsHeaders = {
   "access-control-allow-origin": "*",
@@ -77,6 +97,7 @@ var defaultCorsHeaders = {
 };
 
 var urls = [
+  '/',
   '/log',
   '/send',
   '/classes/chatterbox',
