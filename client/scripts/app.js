@@ -49,8 +49,6 @@ app.send = function(message) {
 	});
 }
 
-
-
 app.clearMessages = function() {
   $('#chats').html('');
 };
@@ -65,7 +63,7 @@ app.addFriend = function (friend) {
 
 app.addMessage = function () {
   var message = {};
-  message.roomname = $('#roomSelect option:selected').val();
+  message.roomname = $('#roomSelect option:selected').val() || 'lobby';
   message.text = $('#messageEntry').val();
   message.username = $('#messageName').val();
   app.send(message);
@@ -145,7 +143,3 @@ $(document).on('ready', function() {
     $(this).removeClass('maybeFriend');
   });
 });
-
-
-//   Test specs
-// app.handleSubmit = triggering $('#send .submit')

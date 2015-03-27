@@ -39,5 +39,8 @@ node_modules
 ### PhPStorm ###
 .idea/
 
+### API ###
 client/env/config.js
 
+### storage ###
+server/messages.json
